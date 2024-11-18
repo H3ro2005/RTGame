@@ -23,6 +23,7 @@ namespace rt::engine {
 
     protected:
         Entity CreateEntity(const std::string_view tag = "default") { return m_Parent.m_Parent->CreateEntity(tag); }
+        void   DeleteEntity(const Entity entity) noexcept { m_Parent.m_Parent->DeleteEntity(entity); }
 
     protected:
         template <typename T, typename... TArgs>

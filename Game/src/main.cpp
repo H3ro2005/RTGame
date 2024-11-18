@@ -16,28 +16,6 @@
 #include <thread>
 #include <vector>
 
-class FaceGuyLogic : public rt::engine::Behaviour
-{
-protected:
-    void OnInit() override {}
-    void OnUpdate(const rt::f32 dt) override
-    {
-        using namespace rt;
-        using namespace rt::engine;
-
-        TransformComponent& face_guy_tr = GetComponent<TransformComponent>();
-
-        if (Input::IsKeyDown(Input::Key::W))
-            face_guy_tr.pos.y--;
-        if (Input::IsKeyDown(Input::Key::A))
-            face_guy_tr.pos.x--;
-        if (Input::IsKeyDown(Input::Key::S))
-            face_guy_tr.pos.y++;
-        if (Input::IsKeyDown(Input::Key::D))
-            face_guy_tr.pos.x++;
-    }
-};
-
 class GameManager : public rt::engine::Behaviour
 {
 private:
@@ -50,11 +28,6 @@ protected:
         using namespace rt::engine;
 
         // Initilization goes here.
-        m_FaceGuy = CreateEntity();
-        auto& bc  = m_FaceGuy.AddComponent<BehaviourComponent>();
-        bc.Attach<FaceGuyLogic>();
-        auto& sc  = m_FaceGuy.AddComponent<SpriteComponent>();
-        sc.LoadFromFile("assets/invader.txt");
     }
     void OnUpdate(const rt::f32 dt) override
     {

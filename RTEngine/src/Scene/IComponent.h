@@ -1,12 +1,10 @@
 #pragma once
 
 #include <Core/CommonDef.h>
-#include <Renderer/RChar.h>
-#include <vector>
 
 namespace rt::engine {
     class Entity;
-    
+
     using ComponentID = u32;
 
     inline u32 GenComponentID() noexcept

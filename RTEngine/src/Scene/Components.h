@@ -14,8 +14,10 @@
 #include <memory>
 #include <vector>
 
+#include <nlohmann/json.hpp>
+
 namespace rt::engine {
-    using Sprite      = std::vector<std::vector<RChar>>;
+    using Sprite = std::vector<std::vector<RChar>>;
 
     struct TransformComponent : public IComponent
     {
@@ -29,12 +31,14 @@ namespace rt::engine {
     {
     public:
         Sprite sprite;
+        u16    width;
+        u16    height;
 
     public:
         void LoadFromFile(const std::string& path)
         {
             // Open the file
-            std::ifstream file(path);
+            std::ifstream file{ path, std::ios::binary };
             if (!file.is_open())
             {
                 throw std::runtime_error("Failed to open file");
@@ -57,20 +61,20 @@ namespace rt::engine {
                 if (ch == L'\n')
                 {
                     // Push the current line and start a new one
-                    sprite.push_back(currentLine);
+                    sprite.push_back(std::move(currentLine));
                     currentLine.clear();
                 }
                 else
                 {
                     // Add character to the current line
-                    currentLine.emplace_back(ch, RChar::Attrib::Default);
+                    currentLine.emplace_back(ch);
                 }
             }
 
             // Add the last line if it wasn't followed by a newline
             if (!currentLine.empty())
             {
-                sprite.push_back(currentLine);
+                sprite.push_back(std::move(currentLine));
             }
         }
     };
@@ -80,6 +84,13 @@ namespace rt::engine {
     public:
         std::vector<Sprite> frames;
         u16                 current_frame = 0;
+
+    public:
+        void LoadFromFile(const std::string& path)
+        {
+            std::ifstream fs{ path };
+            if (fs.is_open()) {}
+        }
     };
 
     struct BehaviourComponent : public IComponent

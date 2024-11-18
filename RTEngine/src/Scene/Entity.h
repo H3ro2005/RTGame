@@ -36,10 +36,10 @@ namespace rt::engine {
             const auto id = GetComponentID<T>();
             if (!HasComponent<T>())
             {
-                IComponent* ptr                     = new T{ std::forward<TArgs>(args)... };
+                std::unique_ptr<IComponent> ptr     = std::make_unique<T>(std::forward<TArgs>(args)...);
                 ptr->m_Parent                       = this;
-                m_Parent->m_Registry.at(m_UUID)[id] = ptr;
-                return *reinterpret_cast<T*>(ptr);
+                m_Parent->m_Registry.at(m_UUID)[id] = std::move(ptr);
+                return *reinterpret_cast<T*>(m_Parent->m_Registry.at(m_UUID)[id].get());
             }
             else
                 throw std::runtime_error("Entity already has component.");
@@ -47,12 +47,12 @@ namespace rt::engine {
         template <typename T>
         inline bool HasComponent() noexcept
         {
-            return m_Parent->m_Registry.at(m_UUID)[GetComponentID<T>()];
+            return m_Parent->m_Registry.at(m_UUID)[GetComponentID<T>()] != nullptr;
         }
         template <typename T>
         inline T& GetComponent()
         {
-            return *reinterpret_cast<T*>(m_Parent->m_Registry.at(m_UUID).at(GetComponentID<T>()));
+            return *reinterpret_cast<T*>(m_Parent->m_Registry.at(m_UUID).at(GetComponentID<T>()).get());
         }
 
     public:

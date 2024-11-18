@@ -66,7 +66,15 @@ namespace rt::engine {
         std::uniform_int_distribution<u32> dist{ 0, std::numeric_limits<u32>::max() };
         const auto                         entity = Entity{ dist(m_Gen), this };
         m_Registry[entity.m_UUID];
-        m_Registry[entity.m_UUID][GetComponentID<TransformComponent>()] = new TransformComponent{};
+        m_Registry[entity.m_UUID][GetComponentID<TransformComponent>()] = std::make_unique<TransformComponent>();
         return entity;
+    }
+
+    void Scene::DeleteEntity(const Entity entity) noexcept
+    {
+        if (auto it = m_Registry.find(entity); it != m_Registry.end())
+        {
+            m_Registry.erase(it);
+        }
     }
 } // namespace rt::engine
