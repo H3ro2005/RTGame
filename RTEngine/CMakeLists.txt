@@ -22,3 +22,5 @@ elseif(CMAKE_SYSNAME STREQUAL "Linux")
 elseif(CMAKE_SYSNAME STREQUAL "Darwin")
 	target_sources(rtengine PRIVATE ${PLATFORM_POSIX_SOURCES})
 endif()
+
+# Libraries

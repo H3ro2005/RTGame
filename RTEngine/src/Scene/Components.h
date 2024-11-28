@@ -4,6 +4,7 @@
 #include <Core/CommonDef.h>
 #include <Renderer/RChar.h>
 #include <Scene/Scene.h>
+#include <Utils/Utils.h>
 
 #include "IComponent.h"
 
@@ -13,8 +14,7 @@
 #include <locale>
 #include <memory>
 #include <vector>
-
-#include <nlohmann/json.hpp>
+#include <iostream>
 
 namespace rt::engine {
     using Sprite = std::vector<std::vector<RChar>>;
@@ -89,7 +89,20 @@ namespace rt::engine {
         void LoadFromFile(const std::string& path)
         {
             std::ifstream fs{ path };
-            if (fs.is_open()) {}
+            if (fs.is_open())
+            {
+                std::string content((std::istreambuf_iterator<char>(fs)), std::istreambuf_iterator<char>());
+
+                // Use a UTF-8 to wchar_t converter
+                std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+
+                // Convert the file content to a wide string
+                std::wstring wide_content = converter.from_bytes(content);
+
+                std::vector<std::wstring> tokens = utils::WSplitBy(wide_content, ' ');
+
+                std::cout << "asd" << std::endl;
+            }
         }
     };
 

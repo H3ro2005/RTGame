@@ -28,14 +28,13 @@ protected:
         using namespace rt::engine;
 
         // Initilization goes here.
+
+        m_FaceGuy.AddComponent<SpriteAnimationComponent>().LoadFromFile("invader.txt");
     }
     void OnUpdate(const rt::f32 dt) override
     {
         using namespace rt;
         using namespace rt::engine;
-
-        // Update goes here...
-        FaceGuyMovement(dt);
     }
     void FaceGuyMovement(const rt::f32 dt) {}
 };
