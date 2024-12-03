@@ -1,4 +1,29 @@
-anim="idle";dim=[6, 1];len=2;int=2:
+@anim="idle";dim=[6, 1];len=2;delta=2:
 <-/\->
 <_/\_>
+@anim="explode";dim=[3, 3];len=8;delta=3:
+
+ *
+
+
+***
+
+ *
+***
+ *
+ *
+***
+ *
+ *
+***
+ *
+ *
+***
+
+
+***
+
+
+ *
+
 

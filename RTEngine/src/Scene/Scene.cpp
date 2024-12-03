@@ -58,6 +58,25 @@ namespace rt::engine {
                     e->OnUpdate(dt);
                 }
             }
+            if (entity.HasComponent<SpriteAnimationComponent>())
+            {
+                auto& sac = entity.GetComponent<SpriteAnimationComponent>();
+                if (--sac.currentDelta <= 0)
+                {
+                    sac.currentFrame = (sac.currentFrame >= sac.activeAnim->frames.size() - 1) ? 0 : sac.currentFrame + 1;
+                    sac.Reset();
+                }
+
+                const auto& current_frame = sac.activeAnim->frames[sac.currentFrame];
+                for (u16 i = 0; i < current_frame.size(); ++i)
+                {
+                    for (u16 j = 0; j < current_frame[i].size(); ++j)
+                    {
+                        m_Renderer->RenderChar(current_frame[i][j], iVec2{ static_cast<u16>(transform.pos.x + j),
+                                                                           static_cast<u16>(transform.pos.y + i) });
+                    }
+                }
+            }
         }
     }
 

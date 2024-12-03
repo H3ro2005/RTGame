@@ -29,7 +29,12 @@ protected:
 
         // Initilization goes here.
 
-        m_FaceGuy.AddComponent<SpriteAnimationComponent>().LoadFromFile("invader.txt");
+        m_FaceGuy = CreateEntity();
+        m_FaceGuy.GetComponent<TransformComponent>().pos = { 5, 5 };
+        auto& sac = m_FaceGuy.AddComponent<SpriteAnimationComponent>();
+        sac.LoadFromFile("spaceship.txt");
+        sac.SetActiveAnim("explode");
+
     }
     void OnUpdate(const rt::f32 dt) override
     {

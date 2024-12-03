@@ -11,10 +11,10 @@
 #include <codecvt>
 #include <filesystem>
 #include <fstream>
+#include <iostream>
 #include <locale>
 #include <memory>
 #include <vector>
-#include <iostream>
 
 namespace rt::engine {
     using Sprite = std::vector<std::vector<RChar>>;
@@ -82,10 +82,35 @@ namespace rt::engine {
     struct SpriteAnimationComponent : public IComponent
     {
     public:
-        std::vector<Sprite> frames;
-        u16                 current_frame = 0;
+        struct Animation
+        {
+            std::string         name;
+            iVec2               dim;
+            u16                 delta;
+            std::vector<Sprite> frames;
+        };
 
     public:
+        std::vector<Animation> anims;
+        u32                    currentFrame = 0;
+        u16                    currentDelta = 0;
+        Animation*             activeAnim   = nullptr;
+
+    public:
+        void SetActiveAnim(const std::string_view anim)
+        {
+            const auto it = std::find_if(anims.begin(), anims.end(),
+                                         [anim](const Animation& e) { return e.name == anim; });
+            if (it != anims.end())
+            {
+                activeAnim   = &(*it);
+                currentFrame = 0;
+                currentDelta = activeAnim->delta;
+            }
+            else
+                throw std::runtime_error("Animation does not exist.");
+        }
+        void Reset() { currentDelta = activeAnim->delta; }
         void LoadFromFile(const std::string& path)
         {
             std::ifstream fs{ path };
@@ -99,9 +124,73 @@ namespace rt::engine {
                 // Convert the file content to a wide string
                 std::wstring wide_content = converter.from_bytes(content);
 
-                std::vector<std::wstring> tokens = utils::WSplitBy(wide_content, ' ');
+                const auto anims = utils::WSplitBy(wide_content, '@');
 
-                std::cout << "asd" << std::endl;
+                for (const auto& anim : anims)
+                {
+                    const auto anim_spec = utils::WSplitBy(anim, ':');
+
+                    if (!anim_spec.empty())
+                    {
+                        // Parse animation parameters.
+                        Animation anim;
+                        for (const auto arg : utils::WSplitBy(anim_spec[0], ';'))
+                        {
+                            if (arg.starts_with(L"anim="))
+                            {
+                                anim.name = std::string{ std::next(std::find(arg.begin(), arg.end(), '"')),
+                                                         std::prev(std::find(arg.rbegin(), arg.rend(), '"').base()) };
+                            }
+                            else if (arg.starts_with(L"dim="))
+                            {
+                                anim.dim.x = std::stoi(
+                                    std::wstring{ std::next(std::find(arg.begin(), arg.end(), '[')),
+                                                  std::prev(std::find(arg.rbegin(), arg.rend(), ',').base()) });
+                                anim.dim.y = std::stoi(
+                                    std::wstring{ std::next(std::find(arg.begin(), arg.end(), ',')),
+                                                  std::prev(std::find(arg.rbegin(), arg.rend(), ']').base()) });
+                            }
+                            else if (arg.starts_with(L"len="))
+                            {
+                                anim.frames.resize(std::stoi(utils::WSplitBy(arg, '=')[1]));
+                            }
+                            else if (arg.starts_with(L"delta="))
+                            {
+                                anim.delta = std::stoi(utils::WSplitBy(arg, '=')[1]);
+                            }
+                        }
+
+                        // Parse the actual animation based on the parameters provided.
+                        i32 x = 0, y = 0, i = 0, j = 0;
+                        anim.frames[i].resize(anim.dim.y, std::vector<RChar>(anim.dim.x));
+                        for (const auto c : anim_spec[1])
+                        {
+                            if (c != '\n')
+                            {
+                                anim.frames[i][y][x] = RChar{ c };
+
+                                if (x == anim.dim.x - 1)
+                                {
+                                    x = 0;
+                                    ++y;
+                                }
+                                if (y == anim.dim.y)
+                                {
+                                    x = 0;
+                                    y = 0;
+                                    if (i + 1 < anim.frames.size())
+                                        anim.frames[++i].resize(anim.dim.y, std::vector<RChar>(anim.dim.x));
+                                    else
+                                        break;
+                                }
+                                else
+                                    ++x;
+                            }
+                        }
+
+                        this->anims.push_back(std::move(anim));
+                    }
+                }
             }
         }
     };
